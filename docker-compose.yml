@@ -72,9 +72,12 @@ services:
         volumes:
             - ./data/rabbitmq/data/:/var/lib/rabbitmq/
             - ./data/rabbitmq/log/:/var/log/rabbitmq
+            - ./rabbitmq/conf.d/:/etc/rabbitmq/conf.d
             - ./rabbitmq/enabled_plugins/:/etc/rabbitmq/enabled_plugins
         networks:
             - micro-pod
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
 networks:
     micro-pod:
         driver: bridge
