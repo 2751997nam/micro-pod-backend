@@ -52,7 +52,7 @@ services:
     redis:
         image: redis:alpine
         ports:
-            - ${FORWARD_REDIS_PORT:-6379}:6379
+            - ${FORWARD_REDIS_PORT:-6311}:6379
         volumes:
             - ${REDIS_VOLUME_LOCAL:-./data/database/redis-data}:/data
         networks:
@@ -67,8 +67,8 @@ services:
     rabbitmq:
         image: rabbitmq:3-management-alpine
         ports:
-            - 5672:5672
-            - 15672:15672
+            - 5611:5672
+            - 15611:15672
         volumes:
             - ./data/rabbitmq/data/:/var/lib/rabbitmq/
             - ./data/rabbitmq/log/:/var/log/rabbitmq
