@@ -1,0 +1,38 @@
+FROM dunglas/frankenphp:1.1-builder-php8.2.16
+
+ARG PROJECT_PATH
+
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    git \
+    unzip \
+    librabbitmq-dev \
+    libpq-dev \
+    supervisor
+
+# Stage 1: Build the app
+FROM node:18-alpine AS build
+
+ARG PROJECT_PATH
+
+ENV SHELL=/bin/bash
+
+ENV TZ="Asia/Ho_Chi_Minh"
+
+# Set working directory
+WORKDIR /var/www/html
+
+RUN chmod -R 755 /var/www/html
+
+COPY $PROJECT_PATH .
+
+COPY ./docker/nodejs/start /var/www/start
+
+# Install TypeScript and build the project
+RUN npm install -g typescript
+RUN npm install -g @nestjs/cli
+RUN npm install -g nodemon
+RUN npm install -g chokidar-cli
+
+# Expose port 3000 (or whatever port your app runs on)
+EXPOSE 3000

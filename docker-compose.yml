@@ -1,0 +1,80 @@
+services:
+    admin:
+        build:
+            context: ./
+            args:
+                PROJECT_PATH: ./admin
+            dockerfile: ./docker/Dockerfile.local
+        env_file:
+            - ./admin/.env
+        command: bash -c "sh /var/www/start/start.sh"
+        ports:
+            - 8100:8000
+            - 5100:${VITE_PORT:-5173}
+        volumes:
+            - ./docker/start:/var/www/start
+            - ./admin:${WORKDIR}
+            - ./Packages/:/var/www/Packages
+            - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+            - ./docker/etc/supervisor.d/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
+        networks:
+            - micro-pod
+        depends_on:
+            - redis
+            - rabbitmq
+        extra_hosts:
+          - "host.docker.internal:host-gateway"
+    product-api:
+        build:
+            context: ./
+            args:
+                PROJECT_PATH: ./product-api
+            dockerfile: ./docker/Dockerfile.local
+        env_file:
+            - ./product-api/.env
+        command: bash -c "sh /var/www/start/start.sh"
+        ports:
+            - 8101:8000
+            - 5101:${VITE_PORT:-5173}
+        volumes:
+            - ./docker/start:/var/www/start
+            - ./product-api:${WORKDIR}
+            - ./Packages/:/var/www/Packages
+            - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+            - ./docker/etc/supervisor.d/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
+        networks:
+            - micro-pod
+        depends_on:
+            - redis
+            - rabbitmq
+        extra_hosts:
+          - "host.docker.internal:host-gateway"
+    redis:
+        image: redis:alpine
+        ports:
+            - ${FORWARD_REDIS_PORT:-6379}:6379
+        volumes:
+            - ${REDIS_VOLUME_LOCAL:-./data/database/redis-data}:/data
+        networks:
+            - micro-pod
+        healthcheck:
+            test:
+                - CMD
+                - redis-cli
+                - ping
+            retries: 3
+            timeout: 5s
+    rabbitmq:
+        image: rabbitmq:3-management-alpine
+        ports:
+            - 5672:5672
+            - 15672:15672
+        volumes:
+            - ./data/rabbitmq/data/:/var/lib/rabbitmq/
+            - ./data/rabbitmq/log/:/var/log/rabbitmq
+            - ./rabbitmq/enabled_plugins/:/etc/rabbitmq/enabled_plugins
+        networks:
+            - micro-pod
+networks:
+    micro-pod:
+        driver: bridge

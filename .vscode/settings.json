@@ -1,0 +1,9 @@
+{
+    "intelephense.environment.phpVersion": "8.2",
+    "eslint.workingDirectories": [
+        {
+            "mode": "auto"
+        }
+    ],
+    "explorer.excludeGitIgnore": false,
+}
