@@ -95,7 +95,7 @@ class ProductServiceImpl implements IProductService
     
                 $this->productGalleryService->saveProductGallery($product->id, !empty($input['gallery']) ? $input['gallery'] : []);
     
-                $this->productVideoService->saveProductVideo($product->id, !empty($input['videos']) ? $input['videos'] : []);
+                // $this->productVideoService->saveProductVideo($product->id, !empty($input['videos']) ? $input['videos'] : []);
     
                 $dataLogCollection = [];
                 if (!empty($galleryLog)) {
@@ -112,9 +112,9 @@ class ProductServiceImpl implements IProductService
                 }
                 $logData['data'] = json_encode($dataLog);
                 $this->logService->writeProductLog($dataLog, $product->id, $logData['event_type'], $user['email']);
+                $response['status'] = 'successful';
+                $response['result'] = $product->id;
             }
-            $response['status'] = 'successful';
-            $response['result'] = $product->id;
             
             DB::commit();
         } catch (\Exception $ex) {

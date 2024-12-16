@@ -19,7 +19,7 @@ class ProductQueryImpl implements IProductQuery
     {
         $product = $this->productRepo
             ->getModel()
-            ->with(['categories', 'galleries', 'videos', 'tags', 'brand'])
+            ->with(['categories', 'galleries', 'tags', 'brand'])
             ->where('id', $productId)
             ->first();
 

@@ -60,6 +60,8 @@ class QueueService {
         
         $channel->basic_publish($msg, $this->getExchange($event), $event->getRoutingKey());
 
+        \Log::info('publishEvent', [$this->getExchange($event), $event->getRoutingKey(), $messageBody]);
+
         $channel->close();
     }
 
