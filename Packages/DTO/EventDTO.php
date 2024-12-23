@@ -10,6 +10,7 @@ class EventDTO implements IEvent
 
     use JsonTrait;
     public string $queueName;
+    public string $exchange;
     public string $routingKey;
     public string $exchangeType;
     public $data;
@@ -28,6 +29,18 @@ class EventDTO implements IEvent
     public function setQueueName(string $queueName): self
     {
         $this->queueName = $queueName;
+
+        return $this;
+    }
+
+    public function getExchange(): string
+    {
+        return $this->exchange;
+    }
+
+    public function setExchange(string $exchange): self
+    {
+        $this->exchange = $exchange;
 
         return $this;
     }

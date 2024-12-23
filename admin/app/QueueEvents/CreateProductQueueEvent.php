@@ -14,7 +14,12 @@ class CreateProductQueueEvent implements IEvent
 
     public function getQueueName(): string
     {
-        return 'product';
+        return 'micro_pod_admin_product';
+    }
+
+    public function getExchange(): string
+    {
+        return 'product.' . $this->getRoutingKey() . '.' . $this->getExchangeType();
     }
 
     public function getRoutingKey(): string

@@ -31,6 +31,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(\App\Services\IProductValidatorService::class, \App\Services\Impls\ProductValidatorServiceImpl::class);
         $this->app->bind(\App\Services\ITagReferService::class, \App\Services\Impls\TagReferServiceImpl::class);
         $this->app->bind(\App\Services\IProductService::class, \App\Services\Impls\ProductServiceImpl::class);
+        $this->app->bind(\App\Services\IProductSkuService::class, \App\Services\Impls\ProductSkuServiceImpl::class);
+        $this->app->bind(\App\Services\IVariantService::class, \App\Services\Impls\VariantServiceImpl::class);
 
         $this->app->bind(\App\Queries\IProductQuery::class, \App\Queries\Impls\ProductQueryImpl::class);
     }

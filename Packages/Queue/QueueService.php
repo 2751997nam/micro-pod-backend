@@ -31,12 +31,12 @@ class QueueService {
     public function getConsumeChannel(IEvent $event): AMQPChannel {
         $this->connect();
         $channel = $this->connection->channel();
-        $queueName = Utils::toSnakeCase(strtolower(config('app.name')) . '_' . $event->getQueueName());
+        $queueName = $event->getQueueName();
         $channel->queue_declare($queueName, false, true, false, false);
 
-        $channel->exchange_declare($this->getExchange($event), $event->getExchangeType(), false, true, false);
+        $channel->exchange_declare($event->getExchange(), $event->getExchangeType(), false, true, false);
 
-        $channel->queue_bind($queueName, $this->getExchange($event), $event->getRoutingKey());
+        $channel->queue_bind($queueName, $event->getExchange(), $event->getRoutingKey());
 
         $channel->basic_qos(null, 10, null);
 
@@ -47,7 +47,7 @@ class QueueService {
         $this->connect();
         $channel = $this->connection->channel();
 
-        $channel->exchange_declare($this->getExchange($event), $event->getExchangeType(), false, true, false);
+        $channel->exchange_declare($event->getExchange(), $event->getExchangeType(), false, true, false);
 
         return $channel;
     }
@@ -58,9 +58,9 @@ class QueueService {
         $channel = $this->getPublishChannel($event);
         $msg = new AMQPMessage($messageBody, ['delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT]);
         
-        $channel->basic_publish($msg, $this->getExchange($event), $event->getRoutingKey());
+        $channel->basic_publish($msg, $event->getExchange(), $event->getRoutingKey());
 
-        \Log::info('publishEvent', [$this->getExchange($event), $event->getRoutingKey(), $messageBody]);
+        \Log::info('publishEvent', [$event->getExchange(), $event->getRoutingKey(), $messageBody]);
 
         $channel->close();
     }
@@ -75,7 +75,7 @@ class QueueService {
     public function consumeEvent(IEvent $event, $callback) {
         $channel = $this->getConsumeChannel($event);
 
-        $queueName = Utils::toSnakeCase(strtolower(config('app.name')) . '_' . $event->getQueueName());
+        $queueName = $event->getQueueName();
         $channel->basic_consume($queueName, '', false, false, false, false, $callback);
 
         try {
@@ -85,25 +85,22 @@ class QueueService {
         }
     }
 
-    public function consumeExchange($exchange, $callback) {
-        $event = $this->parseExchange($exchange);
+    public function consumeExchange($exchange, $queueName, $callback) {
+        $event = $this->parseExchange($exchange, $queueName);
 
         \Log::info('consumeExchange', [$event]);
 
         $this->consumeEvent($event, $callback);
     }
 
-    public function parseExchange($exchange): IEvent {
+    public function parseExchange($exchange, $queueName = ''): IEvent {
         $retVal = new EventDTO();
-        list($queueName, $routingKey, $exchangeType) = explode('.', $exchange);
+        list($tmp, $routingKey, $exchangeType) = explode('.', $exchange);
         $retVal->setQueueName($queueName)
+            ->setExchange($exchange)
             ->setRoutingKey($routingKey)
             ->setExchangeType($exchangeType);
             
         return $retVal;
-    }
-
-    public function getExchange(IEvent $event): string {
-        return $event->getQueueName() . '.' . $event->getRoutingKey() . '.' . $event->getExchangeType();
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use PhpAmqpLib\Message\AMQPMessage;
 use App\Packages\Queue\QueueService;
 use App\Listeners\CreateProductListener;
@@ -37,11 +38,12 @@ class ConsumeQueueCommand extends Command
     {
         \Log::info('Consumming queue');
 
-        $this->queueService->consumeExchange('product.create.fanout', function (AMQPMessage $message) {
+        $this->queueService->consumeExchange('product.create.fanout', 'micro_pod_product_api_product', function (AMQPMessage $message) {
             \Log::info('has message product.create.fanout');
             try {
-                app()->make(\App\Listeners\CreateProductListener::class)->handle($message);
+                (app()->make(\App\Listeners\CreateProductListener::class))->handle($message);
             } catch (\Exception $ex) {
+                \Log::info('error product.create.fanout', [$ex]);
                 \Log::error($ex);
             }
         });

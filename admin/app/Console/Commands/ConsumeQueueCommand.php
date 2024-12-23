@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use PhpAmqpLib\Message\AMQPMessage;
 use App\Packages\Queue\QueueService;
 
@@ -37,7 +38,7 @@ class ConsumeQueueCommand extends Command
 
         \Log::info('Consumming queue');
         
-        $this->queueService->consumeExchange('product.create.fanout', function (AMQPMessage $message) {
+        $this->queueService->consumeExchange('product.create.fanout', 'micro_pod_admin_product', function (AMQPMessage $message) {
             \Log::info('product.create $message', [$message->getBody()]);
             $message->ack();
         });

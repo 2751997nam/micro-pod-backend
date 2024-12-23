@@ -6,8 +6,11 @@ use Illuminate\Support\Str;
 use App\Packages\Utils\Utils;
 use App\Services\ILogService;
 use App\Services\IProductService;
+use App\Services\IVariantService;
 use App\Services\ITagReferService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Services\IProductSkuService;
 use App\Services\IProductVideoService;
 use App\Repositories\IProductRepository;
 use App\Services\IProductGalleryService;
@@ -25,6 +28,8 @@ class ProductServiceImpl implements IProductService
     protected IProductVideoService $productVideoService;
     protected ITagReferService $tagReferService;
     protected ILogService $logService;
+    protected IProductSkuService $productSkuService;
+    protected IVariantService $variantService;
     
     public function __construct(
         IProductRepository $productRepo,
@@ -33,6 +38,8 @@ class ProductServiceImpl implements IProductService
         IProductGalleryService $productGalleryService,
         IProductVideoService $productVideoService,
         ITagReferService $tagReferService,
+        IProductSkuService $productSkuService,
+        IVariantService $variantService,
         ILogService $logService
     ) {
         $this->productRepo = $productRepo;
@@ -41,6 +48,8 @@ class ProductServiceImpl implements IProductService
         $this->productGalleryService = $productGalleryService;
         $this->productVideoService = $productVideoService;
         $this->tagReferService = $tagReferService;
+        $this->productSkuService = $productSkuService;
+        $this->variantService = $variantService;
         $this->logService = $logService;
     }
 
@@ -110,6 +119,8 @@ class ProductServiceImpl implements IProductService
                 if (!empty($dataLogCollection)) {
                     $dataLog['collections'] = $dataLogCollection;
                 }
+                $tmpVariants = $this->variantService->storeVariants($input);
+                $this->productSkuService->saveProductSkues($input, $tmpVariants, $product->id);
                 $logData['data'] = json_encode($dataLog);
                 $this->logService->writeProductLog($dataLog, $product->id, $logData['event_type'], $user['email']);
                 $response['status'] = 'successful';
