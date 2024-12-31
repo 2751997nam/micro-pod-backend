@@ -1,3 +1,7 @@
 netstat -ano | findstr 5611
 
 taskkill /pid 1234 /f
+
+#2
+
+net stop winnat && net start winnat
