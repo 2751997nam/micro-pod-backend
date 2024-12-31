@@ -220,4 +220,8 @@ return [
 
     'max_execution_time' => 30,
 
+    'connections' => [
+        'mysql',
+        // Add other connections if applicable
+    ],
 ];

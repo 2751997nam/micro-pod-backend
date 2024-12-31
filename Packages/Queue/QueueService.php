@@ -10,27 +10,28 @@ use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 class QueueService {
-    private $connection;
+    private $connections;
 
     public function __construct() {
-
+        $this->connections = [];
     }
 
-    public function connect() {
-        if (!$this->connection) {
-            $this->connection = $this->getConnection();
+    public function connect($queueName) {
+        if (!isset($this->connections[$queueName])) {
+            $this->connections[$queueName] = $this->createConnection();
+            \Log::info('current connections', array_keys($this->connections));
         }
     }
     
-    public function getConnection() {
+    public function createConnection() {
         $config = config('queue.connections.rabbitmq');
         $host = $config['hosts'][0];
         return new AMQPStreamConnection($host['host'], $host['port'], $host['user'], $host['password'], $host['vhost']);
     }
 
     public function getConsumeChannel(IEvent $event): AMQPChannel {
-        $this->connect();
-        $channel = $this->connection->channel();
+        $this->connect($event->getQueueName());
+        $channel = $this->getConnection($event->getQueueName())->channel();
         $queueName = $event->getQueueName();
         $channel->queue_declare($queueName, false, true, false, false);
 
@@ -43,24 +44,37 @@ class QueueService {
         return $channel;
     }
 
-    public function getPublishChannel(IEvent $event): AMQPChannel {
-        $this->connect();
-        $channel = $this->connection->channel();
+    public function getChannel($queueName): AMQPChannel {
+        return $this->getConnection($queueName)->channel();
+    }
 
+    public function getConnection($queueName): AMQPStreamConnection {
+        return $this->connections[$queueName];
+    }
+
+    public function getPublishChannel(IEvent $event): AMQPChannel {
+        \Log::info('getPublishChannel connecting');
+        $this->connect($event->getQueueName());
+        \Log::info('getPublishChannel connected');
+        $channel = $this->getConnection($event->getQueueName())->channel();
+        \Log::info('getPublishChannel exchange_declare');
         $channel->exchange_declare($event->getExchange(), $event->getExchangeType(), false, true, false);
+        \Log::info('getPublishChannel exchange_declare done');
 
         return $channel;
     }
 
     public function publishEvent(IEvent $event)
     {
+        \Log::info('publishEvent Begin');
         $messageBody = json_encode($event->getData());
         $channel = $this->getPublishChannel($event);
         $msg = new AMQPMessage($messageBody, ['delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT]);
+        \Log::info('publishEvent basic_publish');
         
         $channel->basic_publish($msg, $event->getExchange(), $event->getRoutingKey());
 
-        \Log::info('publishEvent', [$event->getExchange(), $event->getRoutingKey(), $messageBody]);
+        \Log::info('publishEvent basic_publish done', [$event->getExchange(), $event->getRoutingKey(), $messageBody]);
 
         $channel->close();
     }
@@ -77,11 +91,10 @@ class QueueService {
 
         $queueName = $event->getQueueName();
         $channel->basic_consume($queueName, '', false, false, false, false, $callback);
-
         try {
             $channel->consume();
-        } catch (\Throwable $exception) {
-            echo $exception->getMessage();
+        } catch (\Exception $ex) {
+            \Log::error($ex);
         }
     }
 

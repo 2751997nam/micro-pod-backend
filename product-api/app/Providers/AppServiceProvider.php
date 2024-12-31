@@ -2,12 +2,8 @@
 
 namespace App\Providers;
 
-use PhpAmqpLib\Message\AMQPMessage;
-use App\Packages\Queue\QueueService;
+use App\Listeners\ListenerManager;
 use Illuminate\Support\ServiceProvider;
-use App\Listeners\CreateProductListener;
-use App\Queries\IProductQuery;
-use App\QueueEvents\CreateProductQueueEvent;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -42,6 +38,5 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
     }
 }
