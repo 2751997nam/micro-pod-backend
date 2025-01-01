@@ -53,24 +53,18 @@ class QueueService {
     }
 
     public function getPublishChannel(IEvent $event): AMQPChannel {
-        \Log::info('getPublishChannel connecting');
         $this->connect($event->getQueueName());
-        \Log::info('getPublishChannel connected');
         $channel = $this->getConnection($event->getQueueName())->channel();
-        \Log::info('getPublishChannel exchange_declare');
         $channel->exchange_declare($event->getExchange(), $event->getExchangeType(), false, true, false);
-        \Log::info('getPublishChannel exchange_declare done');
 
         return $channel;
     }
 
     public function publishEvent(IEvent $event)
     {
-        \Log::info('publishEvent Begin');
         $messageBody = json_encode($event->getData());
         $channel = $this->getPublishChannel($event);
         $msg = new AMQPMessage($messageBody, ['delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT]);
-        \Log::info('publishEvent basic_publish');
         
         $channel->basic_publish($msg, $event->getExchange(), $event->getRoutingKey());
 
