@@ -65,8 +65,8 @@ services:
     rabbitmq:
         image: rabbitmq:3-management-alpine
         ports:
-            - 5611:5672
-            - 15611:15672
+            - 5111:5672
+            - 15111:15672
         volumes:
             - ./data/rabbitmq/data/:/var/lib/rabbitmq/
             - ./data/rabbitmq/log/:/var/log/rabbitmq

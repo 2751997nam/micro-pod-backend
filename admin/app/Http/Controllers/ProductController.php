@@ -37,10 +37,13 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, $id = null)
     {
         $user = DB::table('users')->where('email', 'nambcvt275@gmail.com')->first();
         $input = $request->all();
+        if ($id) {
+            $input['id'] = $id;
+        }
 		$this->queueService->publishEvent(new CreateProductQueueEvent(Utils::getPublishMessageData($user, $input)));
 
 		return response()->json([

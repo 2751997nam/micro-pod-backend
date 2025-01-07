@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\Product;
+use App\Models\ProductSkuValue;
+use Illuminate\Database\Eloquent\Model;
 
 class ProductSku extends Model
 {
@@ -21,4 +22,9 @@ class ProductSku extends Model
         'inventory',
         'status'
     ];
+
+    public function skuValues()
+    {
+        return $this->hasMany(ProductSkuValue::class, 'sku_id', 'id');
+    }
 }

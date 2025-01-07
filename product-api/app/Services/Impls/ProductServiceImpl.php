@@ -93,7 +93,6 @@ class ProductServiceImpl implements IProductService
                 $logData['target_id'] = $product->id;
             }
             $logData['created_at'] = new \DateTime();
-            \Log::info('product', [$product]);
             if ($product && isset($product->id)) {
                 $categoryLog = [];
                 $tagLog = [];
@@ -125,6 +124,8 @@ class ProductServiceImpl implements IProductService
                 $this->logService->writeProductLog($dataLog, $product->id, $logData['event_type'], $user['email']);
                 $response['status'] = 'successful';
                 $response['result'] = $product->id;
+            } else {
+                $response['message'] = 'Save product fail';
             }
             
             DB::commit();
