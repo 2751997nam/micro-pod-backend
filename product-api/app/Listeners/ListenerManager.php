@@ -2,14 +2,15 @@
 
 namespace App\Listeners;
 
+use function Swoole\Coroutine\go;
+use function Swoole\Coroutine\run;
 use PhpAmqpLib\Message\AMQPMessage;
 use App\Packages\Queue\QueueService;
 use App\Listeners\CreateProductListener;
+use App\Listeners\UpdateTemplateListener;
 use App\Listeners\PushChangeProductListener;
-use Swoole\Coroutine\Channel;
-use Swoole\Coroutine;
-use function Swoole\Coroutine\run;
-use function Swoole\Coroutine\go;
+use App\Listeners\PushChangeTemplateListener;
+
 class ListenerManager
 {
     private $listeners = [];
@@ -18,7 +19,10 @@ class ListenerManager
     {
         $this->listeners = [
             'createProductListener' => CreateProductListener::class,
-            'pushChangeProductListener' => PushChangeProductListener::class
+            'updateTemplateListener' => UpdateTemplateListener::class,
+
+            'pushChangeProductListener' => PushChangeProductListener::class,
+            'pushChangeTemplateListener' => PushChangeTemplateListener::class
         ];
     }
 

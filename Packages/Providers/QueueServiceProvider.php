@@ -13,7 +13,7 @@ class QueueServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(QueueService::class, function (Application $app) {
+        $this->app->bind(QueueService::class, function (Application $app) {
             return new QueueService();
         });
     }

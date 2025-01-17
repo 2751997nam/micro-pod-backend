@@ -7,7 +7,7 @@ use App\Commands\SaveProduct\SaveProductCommand;
 use App\Envelop;
 use App\Services\IProductService;
 
-class SaveProductHandler implements ICommandHandler
+class SaveProductCommandHandler implements ICommandHandler
 {
     private IProductService $productService;
     public function __construct(IProductService $productService) {
