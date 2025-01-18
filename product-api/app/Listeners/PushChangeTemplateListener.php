@@ -42,13 +42,15 @@ class PushChangeTemplateListener implements ShouldQueue
             // \Log::info('CreateProductListener', [$message->getBody()]);
             \Log::info('PushChangeTemplateListener template.push-change.fanout handle');
             \Log::info('PushChangeTemplateListener message', [$message->getBody()]);
-            $messageData = Utils::getPublishMessageData(null, $this->templateQuery->getData(intval($message->getBody())));
+            $input = json_decode($message->getBody(), true);
+            $messageData = Utils::getPublishMessageData(null, $this->templateQuery->getData(intval($input['id'])));
             $this->queueService->publishExchange('federate_template.changed.fanout', $messageData);
             \Log::info('PushChangeTemplateListener template.push-change.fanout DONE HANDLE');
             $message->ack();
             //code...
         } catch (\Exception $ex) {
             \Log::error($ex);
+            $message->ack();
         }
     }
 }

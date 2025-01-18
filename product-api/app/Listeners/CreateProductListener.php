@@ -58,6 +58,7 @@ class CreateProductListener implements ShouldQueue
             //code...
         } catch (\Exception $ex) {
             \Log::error($ex);
+            $message->ack();
         }
     }
 }

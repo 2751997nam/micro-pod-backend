@@ -44,7 +44,7 @@ class UpdateTemplateListener implements ShouldQueue
             // \Log::info('CreateProductListener', [$message->getBody()]);
             \Log::info('UpdateTemplateListener product.changed.fanout handle');
             $data = Utils::parseMessageData($message->getBody());
-            $response = $this->templateService->saveTemplate($data);
+            $response = $this->templateService->saveTemplate($data['data']);
             if ($response['status'] == 'successful') {
                 \Log::info('UpdateTemplateListener publishing');
                 $this->queueService->publishExchange('template.push-change.fanout', $response['result']);
@@ -58,6 +58,7 @@ class UpdateTemplateListener implements ShouldQueue
             //code...
         } catch (\Exception $ex) {
             \Log::error($ex);
+            $message->ack();
         }
     }
 }

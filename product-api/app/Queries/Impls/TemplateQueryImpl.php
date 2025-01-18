@@ -3,10 +3,11 @@
 namespace App\Queries\Impls;
 
 use App\Models\ProductTemplate;
-use App\Models\ProductTemplateGallery;
-use App\Models\ProductTemplateSku;
-use App\Models\ProductTemplateSkuValue;
 use App\Queries\ITemplateQuery;
+use App\Models\ProductTemplateSku;
+use Illuminate\Support\Facades\Log;
+use App\Models\ProductTemplateGallery;
+use App\Models\ProductTemplateSkuValue;
 
 class TemplateQueryImpl implements ITemplateQuery
 {
@@ -25,6 +26,17 @@ class TemplateQueryImpl implements ITemplateQuery
         $galleries = $this->getGalleries($productId);
         foreach ($skues as &$sku) {
             $sku->gallery = !empty($galleries[$sku->id]) ? $galleries[$sku->id] : [];
+        }
+        $skuValues = ProductTemplateSkuValue::whereIn('sku_id', $skues->pluck('id'))->orderBy('variant_id', 'asc')->get();
+        $optionIdBySkuId = [];
+        foreach ($skuValues as $skuValue) {
+            if (!array_key_exists($skuValue->sku_id, $optionIdBySkuId)) {
+                $optionIdBySkuId[$skuValue->sku_id] = [];
+            }
+            $optionIdBySkuId[$skuValue->sku_id][$skuValue->variant_id] = $skuValue->variant_option_id;
+        }
+        foreach ($skues as &$sku) {
+            $sku->options = array_values($optionIdBySkuId[$sku->id]);
         }
         return $skues;
     }

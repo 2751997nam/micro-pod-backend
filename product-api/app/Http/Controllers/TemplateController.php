@@ -26,7 +26,9 @@ class TemplateController extends Controller
     }
 
     public function sendChangeEvent($id) {
-        $this->queueService->publishExchange('template.push-change.fanout', $id);
+        $this->queueService->publishExchange('template.push-change.fanout', [
+            'id' => $id
+        ]);
 
         return [
             'status' => 'successful'
